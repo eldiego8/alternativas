@@ -237,12 +237,12 @@
                             Fuente Financiera
                         </label>
                         <div class="relative">
-									<select class="block appearance-none w-full bg-gray-200 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500" v-model="fuentef_id" @change="getFuenteFText(fuentef_id)" required>
-										<option v-if="this.fuentes_fin.lenght > 0">Fuente Financiera</option>
-										<template v-for="fuente in this.fuentes_fin" :key="fuente.id">
-											<option :value="fuente.id">{{fuente.fuente}}</option>
-										</template>
-									</select>
+                            <select class="block appearance-none w-full bg-gray-200 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500" v-model="fuentef_id" @change="getFuenteFText(fuentef_id)" required>
+                                <option v-if="this.fuentes_fin.lenght > 0">Fuente Financiera</option>
+                                <template v-for="fuente in this.fuentes_fin" :key="fuente.id">
+                                    <option :value="fuente.id">{{fuente.fuente}}</option>
+                                </template>
+                            </select>
                         </div>
                     </div>
 
@@ -284,15 +284,15 @@
                             </tr>
                         </thead>
                         <tbody>
-									<template v-for="costo,idx in this.costos_array" :key="costo.id">
-										<tr>
-											<td>{{ idx + 1 }}</td>
-											<td>{{ costo.fuentef }}</td>
-											<td>{{ costo.concepto }}</td>
-											<td>{{ costo.monto }}</td>
-										</tr>
-									</template>
-								</tbody>
+                            <template v-for="costo,idx in this.costos_array" :key="costo.id">
+                                <tr>
+                                    <td>{{ idx + 1 }}</td>
+                                    <td>{{ costo.fuentef_text }}</td>
+                                    <td>{{ costo.concepto_text }}</td>
+                                    <td>{{ costo.monto }}</td>
+                                </tr>
+                            </template>
+                        </tbody>
                     </table>
                     <div v-if="this.costos_array.length > 0" class="w-full px-3" style="margin-top:2vh; text-align:center;">
                         <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-first-name">
@@ -451,16 +451,16 @@ export default {
             this.formdata.append('monto_obra', this.monto_obra);
             this.formdata.append('concepto_id', this.concepto_id);
             this.formdata.append('fuente_financiera_id', this.fuentef_id);
-				this.formdata.append('arreglo_costos', JSON.stringify(this.costos_array));
-				this.formdata.append('arreglo_comite', JSON.stringify(this.comite_array));
+            this.formdata.append('arreglo_costos', JSON.stringify(this.costos_array));
+            this.formdata.append('arreglo_comite', JSON.stringify(this.comite_array));
 				
             axios.post('/obras/store', this.formdata)
             .then((res) =>{
                 console.log(res.data);
                 if (res.data != false || res.data != nil){
                     alert("Se guardó con éxito el registro.");
+                    this.cleanInputs();
                 }
-                //this.cleanInputs();
             }).catch(() => {
                 alert('Ocurrió un error, verifica los datos e intenta nuevamente');
             });
@@ -489,20 +489,24 @@ export default {
             this.fuentef_id = null;
             this.concepto_id = null;
             this.costo_total_obra = null;
+            this.cotsos_array = [];
+            this.comite_array = [];
         },
 		  pushCost(){
-			this.costos_array.push({
-				'monto':this.monto_costo,
-				'fuentef':this.fuentef_text,
-				'fuentef_id':this.fuentef_id,
-				'concepto_id':this.concepto_id,
-				'concepto':this.concepto_text,
-			});
-			  this.monto_acumulado += parseFloat(this.monto_costo);
+                this.costos_array.push({
+                    'monto':this.monto_costo,
+                    'fuentef_text':this.fuentef_text,
+                    'fuentef_id':this.fuentef_id,
+                    'concepto_costo_id':this.concepto_id,
+                    'concepto_text':this.concepto_text,
+                });
+            this.monto_acumulado += parseFloat(this.monto_costo);
+            this.costo_total_obra = this.monto_acumulado;
 		  },
 		  removeCost(){
 			  	let last = this.costos_array.pop();
 				this.monto_acumulado -= parseFloat(last.monto);
+                this.costo_total_obra = this.monto_acumulado;
 		  },
 
 		  pushComite(){

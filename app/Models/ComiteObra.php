@@ -10,6 +10,21 @@ class ComiteObra extends Model
     use HasFactory;
     protected $table = "comite_obras";
 
+    public static function updateContent($data, $obra_id){
+        try {
+            $comite = ComiteObra::where('obra_id', $obra_id)->delete();
+            
+            if ($data != null && count($data) > 0){
+                foreach($data as $item){
+                    ComiteObra::insert($obra_id, $item);
+                }
+            }
+
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+    }
+
     public static function insert($obra_id, $data){
         try {
             $comite = new ComiteObra;

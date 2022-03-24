@@ -21,6 +21,7 @@ use App\Http\Controllers\UbicacionesController;
 // All routes require auth
 Route::middleware(['auth', 'verified'])->group(function () {
 
+    // Root route, starting page
     Route::get('/', function () {
         return Inertia::render('Dashboard');
     });
@@ -70,10 +71,21 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/edit', [ObrasController::class, 'editObra']);
         Route::get('/edit/costos/{obra_id}', [ObrasController::class, 'getCostosByObra']);
         Route::get('/edit/comite/{obra_id}', [ObrasController::class, 'getcomiteByObra']);
-
-
+        
         Route::get('/getfuentesf', [ObrasController::class, 'getFuentesF']);
         Route::get('/getconceptos', [ObrasController::class, 'getConceptosObra']);
+        Route::post('/update', [ObrasController::class, 'updateObra']);
+        
+        // Archivos PDF
+        Route::get('/pdf/{obra_id?}', [ObrasController::class, 'makePdf'])->name('makePdf');
+        Route::get('/pdf/inicio/{obra_id}/{paraje?}', [ObrasController::class, 'makePdfInicio'])->name('makePdf_inicio');
+        Route::get('/pdf/fin/{obra_id?}/{paraje?}', [ObrasController::class, 'makePdfFin'])->name('makePdf_termino');
+        Route::get('/pdf/convenio/{obra_id?}/{payload?}', [ObrasController::class, 'makePdfConvenio'])->name('makePdf_convenio');
+
+        // Logs de obras
+        Route::post('/logs/new', [ObrasController::class, 'newLog']);
+        Route::get('/logs/get/{obra_id}', [ObrasController::class, 'getLogs']);
+        Route::delete('/logs/drop/{log_id}', [ObrasController::class, 'dropLog']);
     });
 
     Route::post('/cuencatributaria/nueva', [ObrasController::class, 'nuevaCuencaTributaria']);

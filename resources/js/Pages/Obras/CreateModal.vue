@@ -1,8 +1,7 @@
 <template>
     <div>
-        <button style="margin-left:1vw" ref="modalbtn" @click.prevent="modalAct" class="alt-btn">{{action}}</button>
-
-            <div @click.prevent="modalAct" ref="modalbg" class="modal-bg">
+        <button v-if="type < 120" style="margin-left:1vw" ref="modalbtn" @click.prevent="modalAct" class="alt-btn">{{action}}</button>
+        <div @click.prevent="modalAct" ref="modalbg" class="modal-bg">
 
                 <div class="modal-box">
 
@@ -15,10 +14,10 @@
                         <template v-if="type == 1">
                             <form class="form-control" @submit.prevent="nuevoEstado()">
                                 <div class="form-section">
-                                        <div class="form-element-col-end">
-                                            <label>Estado:</label>
-                                            <input type="text" placeholder="Nombre estado" v-model="estado" name="edoid" required>
-                                        </div>
+                                    <div class="form-element-col-end">
+                                        <label>Estado:</label>
+                                        <input type="text" placeholder="Nombre estado" v-model="estado" name="edoid" required>
+                                    </div>
                                 </div>
                                 <div class="form-actions" style="margin-top:2vh;">
                                     <button ref="closebtn" class="lean-cancel-btn">Cancelar</button>
@@ -136,6 +135,7 @@
                                 </div>
                             </form>
                         </template>
+
                     </div>
                 </div>
             </div>
@@ -159,6 +159,7 @@ export default {
             localidad_id:null, 
             cuenca_tributaria:null,
             tipo_obra:null,
+            fecha_inicio:null,
         }
     },
     methods:{
@@ -215,6 +216,10 @@ export default {
             .then(res => this.localidades = res.data)
             .catch(err => console.error(err));
         },
+        /* Avisos de Obra, Inicio, Fin, Convenio */
+        avisoInicio(){
+            console.log(this.fecha_inicio);
+        }
     },
     created(){
     }
@@ -316,6 +321,7 @@ export default {
 .modal-bg-active {
     visibility: visible;
     opacity: 1;
+    z-index:1;
 }
 
 .modal-box {
@@ -394,6 +400,11 @@ export default {
 
 .modal-footer label {
     font-size: 15px;
+}
+
+.modal_red{
+    background:white;
+    color:#e84043;
 }
 
 @media only screen and (max-width: 500px) {

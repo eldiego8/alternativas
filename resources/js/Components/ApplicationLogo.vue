@@ -1,3 +1,3 @@
 <template>
-    <img src="/assets/logo.jpg" />
+    <img style="height:89%;" src="/assets/logo.jpg" />
 </template>

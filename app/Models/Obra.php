@@ -12,9 +12,54 @@ class Obra extends Model
     use HasFactory;
     protected $table = "obras";
 
+    public static function update_inicio($obra_id){
+        try {
+            $obra = DB::update(
+                "update obras set fecha_inicio = ?, edo_autorizacion_id = 1 where id = ?", [date('Y-m-d'), $obra_id]
+            );
+
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+    }
+    public static function update_termino($obra_id){
+        try {
+            $obra = DB::update(
+                "update obras set fecha_termino = ?, edo_autorizacion_id = 4 where id = ?", [date('Y-m-d'), $obra_id]
+            );
+
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+    }
+
     public static function todasObras(){
         try {
             return Obra::all();
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+    }
+
+    public static function fullObraById($obra_id){
+        try {
+            $obra = Obra::leftJoin('estados', 'obras.estado_id', '=', 'estados.id')
+                        ->leftJoin('cuenca_tributaria', 'obras.localidad_id', '=', 'cuenca_tributaria.localidad_id')
+                        ->leftJoin('estado_autorizaciones', 'obras.edo_autorizacion_id', '=', 'estado_autorizaciones.id')
+                        ->leftJoin('municipios', 'obras.municipio_id', '=', 'municipios.id')
+                        ->leftJoin('localidades', 'obras.localidad_id', '=', 'localidades.id')
+                        ->leftJoin('tipo_obra', 'obras.tipo_obra_id', '=', 'tipo_obra.id')
+                        ->leftJoin('categoria_obra', 'obras.cat_obra_id', '=', 'categoria_obra.id')
+                        ->leftJoin('situacion_obra', 'obras.situacion_id', '=', 'situacion_obra.id')
+                        ->select('obras.id as obra_id','clave_obra', 'estados.estado', 'municipios.municipio', 'localidades.localidad', 'localidades.clave_localidad', 
+                        'cuenca_tributaria.c_tributaria', 'tipo_obra.tipo', 'convenio_obra', 'convenio_general', 'categoria_obra.categoria', 
+                        'situacion_obra.situacion', 'jefe_obra', 'coordinador', 'paraje', 'sistema', 'programa', 'beneficiado_directo', 
+                        'beneficiado_indirecto', 'estado_autorizaciones.estado as edo_aut', 'coordenada_n', 'coordenada_e',
+                        'descripcion', 'justificacion', 'fecha_inicio','total', 'fecha_termino','obras.estado_id', 'obras.municipio_id', 'obras.localidad_id', 'obras.created_at')
+                        ->where('obras.id', $obra_id)
+                        ->get();
+            return $obra;
+
         } catch (\Throwable $th) {
             throw $th;
         }
@@ -35,7 +80,7 @@ class Obra extends Model
                         'cuenca_tributaria.c_tributaria', 'tipo_obra.tipo', 'convenio_obra', 'convenio_general', 'categoria_obra.categoria', 
                         'situacion_obra.situacion', 'jefe_obra', 'coordinador', 'paraje', 'sistema', 'programa', 'beneficiado_directo', 
                         'beneficiado_indirecto', 'estado_autorizaciones.estado as edo_aut', 'coordenada_n', 'coordenada_e',
-                        'descripcion', 'justificacion', 'fecha_inicio','total', 'fecha_termino', 'obras.created_at')
+                        'descripcion', 'justificacion', 'fecha_inicio','total', 'fecha_termino','obras.estado_id', 'obras.municipio_id', 'obras.localidad_id', 'obras.created_at')
                         ->get();
 
             return $obras;

@@ -13,7 +13,7 @@ class CostosObra extends Migration
      */
     public function up()
     {
-        Schema::create('obras', function (Blueprint $table) {
+        Schema::create('obras_costos', function (Blueprint $table) {
             $table->id();
             $table->string('clave_obra')->nullable();
             $table->unsignedBigInteger('estado_id');

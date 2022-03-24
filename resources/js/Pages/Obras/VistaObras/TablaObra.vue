@@ -21,7 +21,7 @@
         </div>
     </template>
 
-    <div class="search-container">
+    <div v-if="this.registros == null || this.registros.length > 0" class="search-container">
         <input type="text" class="clean-input-text" placeholder="Clave de Obra, Estado o Coordinador" v-model="search_text"/>
     </div>
 

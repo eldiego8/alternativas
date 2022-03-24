@@ -10,10 +10,154 @@ use App\Models\CategoriaObra;
 use App\Models\TipoObra;
 use App\Models\CostosObra;
 use App\Models\ComiteObra;
+use App\Models\ObraLog;
+use PDF;
 
 class ObrasController extends Controller
 {
     //
+    public function updateObra(Request $request){
+        try {
+            $general_info = json_decode($request->input('general_info'));
+            $comite_info = json_decode($request->input('comite_info'));
+            $costos_info = json_decode($request->input('costo_info'));
+            
+            $obra_id = $general_info->obra_id;
+
+            //Obra::updateContent($general_info);
+            ComiteObra::updateContent($comite_info, $obra_id);
+            CostosObra::updateContent($costos_info, $obra_id);
+
+            return true;
+
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+    }
+    public function makePdf($obra_id){
+        try {
+            $costos = CostosObra::getCostosByObra($obra_id);
+            $comite = ComiteObra::getcomiteByObra($obra_id);
+            $obra = Obra::FullObraById($obra_id);
+
+            $pdf = PDF::loadView('pdf.obrageneral', [
+                'obra' => $obra,
+                'costos' => json_decode($costos),
+                'comite' => json_decode($comite),
+                'date' => date('Y-m-d')
+                ]);
+            return $pdf->download('test.pdf');
+
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+    }
+
+    public function makePdfInicio($obra_id, $paraje){
+        try {
+            //$costos = CostosObra::getCostosByObra($obra_id);
+            //$comite = ComiteObra::getcomiteByObra($obra_id);
+            $obra = Obra::FullObraById($obra_id);
+            $mes = '';
+
+            // Date formatting
+            switch(date('n')){
+                case '1': $mes = 'Enero'; break; case '2': $mes = 'Febrero'; break; 
+                case '3': $mes = 'Marzo'; break; case '4': $mes = 'Abril'; break; 
+                case '5': $mes = 'Mayo'; break; case '6': $mes = 'Junio'; break; 
+                case '7': $mes = 'Julio'; break; case '8': $mes = 'Agosto'; break; 
+                case '9': $mes = 'Septiembre'; break; case '10': $mes = 'Octubre'; break; 
+                case '11': $mes = 'Noviembre'; break; case '12': $mes = 'Diciembre'; break; 
+            }
+
+            $pdf = PDF::loadView('pdf.avisoinicio', [
+                'obra' => $obra,
+                'paraje' => $paraje,
+                'date' => date('Y-m-d'),
+                'mes' => $mes,
+                'day' => date('d'),
+                'anio' => date('Y')
+                ]);
+
+            // Update status
+            Obra::update_inicio($obra_id);
+
+            return $pdf->download("test_inicio.pdf");
+            //return $pdf->download('test.pdf');
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+    }
+    public function makePdfFin($obra_id, $paraje){
+        try {
+            //$costos = CostosObra::getCostosByObra($obra_id);
+            //$comite = ComiteObra::getcomiteByObra($obra_id);
+            $obra = Obra::FullObraById($obra_id);
+            $mes = '';
+
+            // Date formatting
+            switch(date('n')){
+                case '1': $mes = 'Enero'; break; case '2': $mes = 'Febrero'; break; 
+                case '3': $mes = 'Marzo'; break; case '4': $mes = 'Abril'; break; 
+                case '5': $mes = 'Mayo'; break; case '6': $mes = 'Junio'; break; 
+                case '7': $mes = 'Julio'; break; case '8': $mes = 'Agosto'; break; 
+                case '9': $mes = 'Septiembre'; break; case '10': $mes = 'Octubre'; break; 
+                case '11': $mes = 'Noviembre'; break; case '12': $mes = 'Diciembre'; break; 
+            }
+
+            $pdf = PDF::loadView('pdf.avisotermino', [
+                'obra' => $obra,
+                'paraje' => $paraje,
+                'date' => date('Y-m-d'),
+                'mes' => $mes,
+                'dia' => date('d'),
+                'anio' => date('Y')
+                ]);
+
+            // Update status
+            Obra::update_termino($obra_id);
+
+            return $pdf->download("test_termino.pdf");
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+    }
+
+    public function makePdfConv($obra_id, $payload){
+        try {
+            return json_decode($payload);
+            //$costos = CostosObra::getCostosByObra($obra_id);
+            //$comite = ComiteObra::getcomiteByObra($obra_id);
+            $obra = Obra::FullObraById($obra_id);
+            $mes = '';
+
+            // Date formatting
+            switch(date('n')){
+                case '1': $mes = 'Enero'; break; case '2': $mes = 'Febrero'; break; 
+                case '3': $mes = 'Marzo'; break; case '4': $mes = 'Abril'; break; 
+                case '5': $mes = 'Mayo'; break; case '6': $mes = 'Junio'; break; 
+                case '7': $mes = 'Julio'; break; case '8': $mes = 'Agosto'; break; 
+                case '9': $mes = 'Septiembre'; break; case '10': $mes = 'Octubre'; break; 
+                case '11': $mes = 'Noviembre'; break; case '12': $mes = 'Diciembre'; break; 
+            }
+
+            $pdf = PDF::loadView('pdf.avisotermino', [
+                'obra' => $obra,
+                'paraje' => $paraje,
+                'date' => date('Y-m-d'),
+                'mes' => $mes,
+                'dia' => date('d'),
+                'anio' => date('Y')
+                ]);
+
+            // Update status
+            Obra::update_termino($obra_id);
+
+            return $pdf->download("test_termino.pdf");
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+    }
     
     public function getObrasRegistros(){
         return Obra::obrasRegistros();
@@ -138,6 +282,33 @@ class ObrasController extends Controller
         } catch (\Throwable $th) {
             throw $th;
         }
+    }
+
+    public function newLog(Request $request){
+        try {
+            $log = json_decode($request->input('payload'));
+            $res = ObraLog::createLog($log);
+            return true;
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+    }
+
+    public function getLogs($obra_id){
+        try {
+            return ObraLog::getLogs($obra_id);
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+    }
+
+    public function dropLog($log_id){
+        try{
+            return ObraLog::dropLog($log_id);
+        }catch(\ Throwable $th){
+            throw $th;
+        }
+
     }
 
     private function checkForNull($element){

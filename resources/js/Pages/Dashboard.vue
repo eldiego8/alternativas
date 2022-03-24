@@ -34,6 +34,8 @@
             </template>
             
             <template v-if="selection == 4">
+                <actas-obra>
+                </actas-obra>
             </template>
 
             <template v-if="selection == 5">
@@ -52,13 +54,13 @@ import MenuBar from '../CustomComponent/MenuBar.vue';
 import ApsIndex from './Principal/ApsIndex.vue';
 import NuevaObra from './Obras/NuevaObra.vue';
 import TablaObra from './Obras/VistaObras/TablaObra.vue';
+import ActasObra from './Actas/ActasObra.vue';
 
 export default {
-    components: { BreezeAuthenticatedLayout, Head, MenuBar, ApsIndex, NuevaObra, TablaObra },
+    components: { BreezeAuthenticatedLayout, Head, MenuBar, ApsIndex, NuevaObra, TablaObra, ActasObra },
     data(){
         return{
             selection: 0,
-
         }
     },
     methods:{
