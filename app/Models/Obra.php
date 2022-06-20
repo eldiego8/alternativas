@@ -22,6 +22,13 @@ class Obra extends Model
             throw $th;
         }
     }
+    public static function updateCostoTotal($obra_id, $costo_total){
+        try {
+            $obra = DB::update('update obras set total = ? where id = ?', [$costo_total, $obra_id]);
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+    }
     public static function update_termino($obra_id){
         try {
             $obra = DB::update(
@@ -41,6 +48,14 @@ class Obra extends Model
         }
     }
 
+    public static function getClaveForObra($obra_id){
+        try {
+            return Obra::select('clave_obra')->where('id', $obra_id)->get();
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+    }
+
     public static function fullObraById($obra_id){
         try {
             $obra = Obra::leftJoin('estados', 'obras.estado_id', '=', 'estados.id')
@@ -53,7 +68,7 @@ class Obra extends Model
                         ->leftJoin('situacion_obra', 'obras.situacion_id', '=', 'situacion_obra.id')
                         ->select('obras.id as obra_id','clave_obra', 'estados.estado', 'municipios.municipio', 'localidades.localidad', 'localidades.clave_localidad', 
                         'cuenca_tributaria.c_tributaria', 'tipo_obra.tipo', 'convenio_obra', 'convenio_general', 'categoria_obra.categoria', 
-                        'situacion_obra.situacion', 'jefe_obra', 'coordinador', 'paraje', 'sistema', 'programa', 'beneficiado_directo', 
+                        'situacion_obra.situacion', 'jefe_obra', 'coordinador', 'paraje', 'sistema', 'programa', 
                         'beneficiado_indirecto', 'estado_autorizaciones.estado as edo_aut', 'coordenada_n', 'coordenada_e',
                         'descripcion', 'justificacion', 'fecha_inicio','total', 'fecha_termino','obras.estado_id', 'obras.municipio_id', 'obras.localidad_id', 'obras.created_at')
                         ->where('obras.id', $obra_id)
@@ -78,7 +93,7 @@ class Obra extends Model
                         ->leftJoin('situacion_obra', 'obras.situacion_id', '=', 'situacion_obra.id')
                         ->select('obras.id as obra_id','clave_obra', 'estados.estado', 'municipios.municipio', 'localidades.localidad', 'localidades.clave_localidad', 
                         'cuenca_tributaria.c_tributaria', 'tipo_obra.tipo', 'convenio_obra', 'convenio_general', 'categoria_obra.categoria', 
-                        'situacion_obra.situacion', 'jefe_obra', 'coordinador', 'paraje', 'sistema', 'programa', 'beneficiado_directo', 
+                        'situacion_obra.situacion', 'jefe_obra', 'coordinador', 'paraje', 'sistema', 'programa', 
                         'beneficiado_indirecto', 'estado_autorizaciones.estado as edo_aut', 'coordenada_n', 'coordenada_e',
                         'descripcion', 'justificacion', 'fecha_inicio','total', 'fecha_termino','obras.estado_id', 'obras.municipio_id', 'obras.localidad_id', 'obras.created_at')
                         ->get();
@@ -90,7 +105,7 @@ class Obra extends Model
         }
     }
 
-    public static function guardarNueva($jefe_obra, $coord, $desc, $just, $paraje, $edo_id, $mun_id, $sist, $prog, $convgral, $convobra, $coordn, $coorde, $benefdir, $benefind, $tipo_obra_id, $cat_obra_id, $localidad_id, $total_obra){
+    public static function guardarNueva($jefe_obra, $coord, $desc, $just, $paraje, $edo_id, $mun_id, $sist, $prog, $convgral, $convobra, $coordn, $coorde, $benefind, $tipo_obra_id, $cat_obra_id, $localidad_id, $total_obra){
         try {
 
             $claveobra = Obra::getClaveObra();
@@ -109,7 +124,6 @@ class Obra extends Model
             $obra->convenio_obra = $convobra;
             $obra->coordenada_n = $coordn; $obra->coordenada_e = $coorde;
             $obra->localidad_id = $localidad_id;
-            $obra->beneficiado_directo = $benefdir;
             $obra->beneficiado_indirecto = $benefind;
             $obra->clave_obra = now()->year.$claveobra;
             $obra->tipo_obra_id = $tipo_obra_id;

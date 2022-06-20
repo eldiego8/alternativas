@@ -6,7 +6,7 @@
         subtitle="Alternativas">
       </section-title>
 
-      <div class="inner-options">
+      <div v-if="this.$page.props.auth.user.tipo_usuario == 1" class="inner-options">
           <create-modal
           action="Agregar Estado"
           type="1"
@@ -184,19 +184,16 @@
                     <input class="appearance-none block w-full bg-gray-200 text-gray-700 border border-black-500 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white" type="text" name="revista_lugar" v-model="coorde" placeholder="Coordenada Este" required/>
                 </div>
 
-                <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+                <div class="w-full px-3">
                     <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-first-name">
                         Beneficiados Indirectos
                     </label>
                     <input class="appearance-none block w-full bg-gray-200 text-gray-700 border border-black-500 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white" type="text" name="revista_lugar" v-model="benefind" placeholder="Beneficiados indirectos" required/>
                 </div>
 
-                <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
-                    <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-first-name">
-                        Beneficiados Directos
-                    </label>
-                    <input class="appearance-none block w-full bg-gray-200 text-gray-700 border border-black-500 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white" type="text" name="revista_lugar" v-model="benefdir" placeholder="Beneficiados directos" required/>
-                </div>
+               <beneficiarios-directos 
+                @onUpdateBenefArray = "updateBeneficiariosDirArray($event)"
+               />
 
                 <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
                     <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-first-name">
@@ -212,150 +209,14 @@
                     <textarea class="appearance-none block w-full bg-gray-200 text-gray-700 border border-black-500 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white" name="just" v-model="just" placeholder="Justificacion" required></textarea>
                 </div>
 
-                <h5 style="padding:.75rem; width:100%; margin-top:.75rem; margin-bottom:.75rem; text-align:left; font-weight:600;">COSTOS 
-                    <label style="color:#bbb; font-weight:700;"> (Se pueden llenar después)</label>
-                </h5>
+                <obras-costos 
+                    @onUpdateCostArray="updateCostArray($event)"
+                    :conceptos="this.conceptos_obra"
+                    :f_fin="this.fuentes_fin" 
+                ></obras-costos>
 
-                <div class="w-full px-3">
-                    <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-first-name">
-                        Costo Total de Obra
-                    </label>
-                    <input class="appearance-none block w-full bg-gray-200 text-gray-700 border border-black-500 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white" v-model="costo_total_obra" type="text" />
-                </div>
-                
-                <div class="custom-wrap-01">
-                    <div class="left_col-flex">
-                    <div class="w-full px-3 mb-6 md:mb-0">
-                        <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-first-name">
-                            Monto
-                        </label>
-                        <input class="appearance-none block w-full bg-gray-200 text-gray-700 border border-black-500 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white" v-model="monto_costo" type="text"/>
-                    </div>
-
-                    <div class="w-full px-3 mb-6 md:mb-0">
-                        <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-state">
-                            Fuente Financiera
-                        </label>
-                        <div class="relative">
-                            <select class="block appearance-none w-full bg-gray-200 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500" v-model="fuentef_id" @change="getFuenteFText(fuentef_id)" required>
-                                <option v-if="this.fuentes_fin.lenght > 0">Fuente Financiera</option>
-                                <template v-for="fuente in this.fuentes_fin" :key="fuente.id">
-                                    <option :value="fuente.id">{{fuente.fuente}}</option>
-                                </template>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="w-full px-3 mb-6 md:mb-0">
-                        <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-state">
-                            Concepto
-                        </label>
-                        <div class="relative">
-                            <select class="block appearance-none w-full bg-gray-200 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500" v-model="concepto_id" @change="getConceptoText(concepto_id)" required>
-                            <option v-if="this.conceptos_obra.lenght > 0">Concepto de Obra</option>
-                            <template v-for="conc in this.conceptos_obra" :key="conc.id">
-                                <option :value="conc.id">{{conc.concepto}}</option>
-                            </template>
-                        </select>
-                        </div>
-                    </div>
-						  <div class="w-full px-3 mb-6 md:mb-0">
-								<div class="form-actions" style="margin-top:2vh;">
-									 <template v-if="this.costos_array.length > 0">
-										<button ref="subbutton" class="update-btn" @click.prevent="removeCost" style="color:#e84043; border-color:#e84043;">Eliminar último</button>            				
-									</template>
-                				<button ref="subbutton" class="update-btn" @click.prevent="pushCost" style="color:#e84043; border-color:#e84043;">Añadir Costo</button>
-								</div>
-                    </div>
-                </div>
-                <div class="right_col-flex">
-						 <div class="w-full px-3" style="margin-top:2vh; text-align:center;">
-						 	<label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-first-name">
-								Tabla de Costos
-							</label>
-						 </div>
-                    <table class="table-auto">
-                        <thead>
-                            <tr>
-                                <th style="text-align:left">#</th>
-                                <th style="text-align:left">Fuente F.</th>
-                                <th style="text-align:left">Concepto</th>
-                                <th style="text-align:left">Monto</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <template v-for="costo,idx in this.costos_array" :key="costo.id">
-                                <tr>
-                                    <td>{{ idx + 1 }}</td>
-                                    <td>{{ costo.fuentef_text }}</td>
-                                    <td>{{ costo.concepto_text }}</td>
-                                    <td>{{ costo.monto }}</td>
-                                </tr>
-                            </template>
-                        </tbody>
-                    </table>
-                    <div v-if="this.costos_array.length > 0" class="w-full px-3" style="margin-top:2vh; text-align:center;">
-                        <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-first-name">
-                            El monto acumulado es: $ {{this.monto_acumulado}} MXN
-                        </label>
-                    </div>
-                </div>
-					</div>
-					<h5 style="padding:.75rem; width:100%; margin-top:.75rem; margin-bottom:.75rem; text-align:left; font-weight:600;">COMITÉ 
-						<label style="color:#bbb; font-weight:700;"> (Se puede llenar después)</label>
-					</h5>
-					 <div class="custom-wrap-01 divide-y">
-						<div class="left_col-flex">
-							<div class="w-full px-3 mb-6 md:mb-0">
-								<label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-first-name">
-									Nombre Representante
-								</label>
-								<input class="appearance-none block w-full bg-gray-200 text-gray-700 border border-black-500 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white" v-model="nombre_com" type="text"/>
-							</div>
-
-							<div class="w-full px-3 mb-6 md:mb-0">
-								<label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-first-name">
-									Cargo
-								</label>
-								<input class="appearance-none block w-full bg-gray-200 text-gray-700 border border-black-500 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white" v-model="cargo_com" type="text"/>
-							</div>
-
-							<div class="w-full px-3 mb-6 md:mb-0">
-								<div class="form-actions" style="margin-top:2vh;">
-									<template v-if="this.comite_array.length > 0">
-										<button ref="subbutton" class="update-btn" @click.prevent="removeComite" style="color:#e84043; border-color:#e84043;">Eliminar último</button>            				
-									</template>
-									<button ref="subbutton" class="update-btn" @click.prevent="pushComite" style="color:#e84043; border-color:#e84043;">Añadir Representante</button>
-								</div>
-							</div>
-                	</div>
-
-						<div class="right_col-flex">
-							<div class="w-full px-3" style="margin-top:2vh; text-align:center;">
-								<label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-first-name">
-									Comité
-								</label>
-							</div>
-							<table class="table-auto">
-								<thead>
-									<tr>
-										<th style="text-align:left">#</th>
-										<th style="text-align:left">Nombre</th>
-										<th style="text-align:left">Cargo</th>
-									</tr>
-								</thead>
-								<tbody>
-									<template v-for="comite,idx in this.comite_array" :key="comite.id">
-										<tr>
-											<td>{{ idx + 1 }}</td>
-											<td>{{ comite.nombre }}</td>
-											<td>{{ comite.cargo }}</td>
-										</tr>
-									</template>
-								</tbody>
-							</table>
-						</div>
-                </div>
+                <obras-comite 
+                    @onUpdateComiteArray="updateComiteArray($event)"/>
 
             </div>
             <div class="form-actions" style="margin-top:2vh;">
@@ -371,10 +232,12 @@
 
 import SectionTitle from '../../CustomComponent/SectionTitle.vue';
 import CreateModal from './CreateModal.vue';
-import ObrasCostos from './ObrasCostos.vue';
+import ObrasCostos from './complementos/ObrasCostos.vue';
+import ObrasComite from './complementos/ObrasComite.vue';
+import BeneficiariosDirectos from './complementos/BeneficiariosDirectos.vue';
 
 export default {
-    components:{SectionTitle, CreateModal, ObrasCostos},
+    components:{ SectionTitle, CreateModal, ObrasCostos, ObrasComite, BeneficiariosDirectos },
     props:[],
     data(){
         return{
@@ -407,18 +270,13 @@ export default {
             tipos_obra:[],
             obra_saved:true,
             recent_obra:null,
-            costo_total_obra:null,
             concepto_id:null, 
-            fuentef_id:null,
-            monto_costo:null,
-            costos_array:[],
-            monto_acumulado: 0,
             fuentes_fin:[],
             conceptos_obra:[],
-            comite_array:[],
-            nombre_com:null,
-            cargo_com: null
-        }
+            cost_array_p:[],
+            comite_array_p:[],
+            beneficiarios_directos:[]
+            }
     },
     methods:{
         getEstados(){
@@ -447,13 +305,12 @@ export default {
             this.formdata.append('benefind', this.benefind);
             this.formdata.append('desc', this.desc);
             this.formdata.append('just', this.just);
-            this.formdata.append('costo_total_obra', this.costo_total_obra);
-            this.formdata.append('monto_obra', this.monto_obra);
             this.formdata.append('concepto_id', this.concepto_id);
             this.formdata.append('fuente_financiera_id', this.fuentef_id);
-            this.formdata.append('arreglo_costos', JSON.stringify(this.costos_array));
-            this.formdata.append('arreglo_comite', JSON.stringify(this.comite_array));
-				
+            this.formdata.append('arreglo_costos', JSON.stringify(this.cost_array_p));
+            this.formdata.append('arreglo_comite', JSON.stringify(this.comite_array_p));
+            this.formdata.append('arreglo_beneficiarios_dir', JSON.stringify(this.beneficiarios_directos));
+
             axios.post('/obras/store', this.formdata)
             .then((res) =>{
                 console.log(res.data);
@@ -486,49 +343,9 @@ export default {
             this.cat_id = null; 
             this.tipo_id = null;
             this.ctributaria = null;
-            this.fuentef_id = null;
             this.concepto_id = null;
-            this.costo_total_obra = null;
-            this.cotsos_array = [];
-            this.comite_array = [];
         },
-		  pushCost(){
-                this.costos_array.push({
-                    'monto':this.monto_costo,
-                    'fuentef_text':this.fuentef_text,
-                    'fuentef_id':this.fuentef_id,
-                    'concepto_costo_id':this.concepto_id,
-                    'concepto_text':this.concepto_text,
-                });
-            this.monto_acumulado += parseFloat(this.monto_costo);
-            this.costo_total_obra = this.monto_acumulado;
-		  },
-		  removeCost(){
-			  	let last = this.costos_array.pop();
-				this.monto_acumulado -= parseFloat(last.monto);
-                this.costo_total_obra = this.monto_acumulado;
-		  },
 
-		  pushComite(){
-			this.comite_array.push({
-				'nombre':this.nombre_com,
-				'cargo':this.cargo_com,
-			});
-		  },
-		  removeComite(){
-			  	this.comite_array.pop();
-		  },
-
-		  getConceptoText(id_c){
-			  this.conceptos_obra.forEach(item => {
-					if (item.id == id_c) this.concepto_text = item.concepto;
-			  });
-		  },
-		  getFuenteFText(id_f){
-			  this.fuentes_fin.forEach(item => {
-					if (item.id == id_f) this.fuentef_text = item.fuente;
-			  });
-		  },
         setEstado(element){
             axios.get(`/ubicaciones/municipios/${element.target.value}`)
             .then(res => this.municipios = res.data)
@@ -583,15 +400,23 @@ export default {
             axios.get('/obras/getconceptos')
             .then(res => this.conceptos_obra = res.data)
             .catch(err => console.error(err));
+        },
+        updateCostArray(data){
+            this.cost_array_p = data;
+        },
+        updateComiteArray(data){
+            this.comite_array_p = data;
+        },
+        updateBeneficiariosDirArray(data){
+            this.beneficiarios_directos = data;
         }
-
     },
     created(){
         this.getEstados();
         this.getCategoriasObra();
         this.getTiposObra();
-		  this.getFuentesF();
-		  this.getConceptos();
+        this.getFuentesF();
+        this.getConceptos();
     }
 
 }

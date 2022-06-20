@@ -50,6 +50,7 @@ import SectionTitle from '../../CustomComponent/SectionTitle.vue';
 import ActasExtend from './ActasExtend.vue';
 export default {
     components: { SectionTitle, ActasExtend },
+    emits: ["download"],
     props:[ 'obra' ],
 
     data(){

@@ -11,7 +11,13 @@ use App\Models\TipoObra;
 use App\Models\CostosObra;
 use App\Models\ComiteObra;
 use App\Models\ObraLog;
+use Illuminate\Support\Facades\Storage;
 use PDF;
+use ZipArchive;
+use Zip;
+use File;
+
+
 
 class ObrasController extends Controller
 {
@@ -21,12 +27,14 @@ class ObrasController extends Controller
             $general_info = json_decode($request->input('general_info'));
             $comite_info = json_decode($request->input('comite_info'));
             $costos_info = json_decode($request->input('costo_info'));
-            
-            $obra_id = $general_info->obra_id;
+            $costo_total_obra = $this->setCostoTotalObra($costos_info);
 
+            $obra_id = $general_info->obra_id;
+            
             //Obra::updateContent($general_info);
             ComiteObra::updateContent($comite_info, $obra_id);
             CostosObra::updateContent($costos_info, $obra_id);
+            Obra::updateCostoTotal($obra_id, $costo_total_obra);
 
             return true;
 
@@ -58,17 +66,10 @@ class ObrasController extends Controller
             //$costos = CostosObra::getCostosByObra($obra_id);
             //$comite = ComiteObra::getcomiteByObra($obra_id);
             $obra = Obra::FullObraById($obra_id);
+            $presidente = ComiteObra::getPresidente($obra_id);
             $mes = '';
 
-            // Date formatting
-            switch(date('n')){
-                case '1': $mes = 'Enero'; break; case '2': $mes = 'Febrero'; break; 
-                case '3': $mes = 'Marzo'; break; case '4': $mes = 'Abril'; break; 
-                case '5': $mes = 'Mayo'; break; case '6': $mes = 'Junio'; break; 
-                case '7': $mes = 'Julio'; break; case '8': $mes = 'Agosto'; break; 
-                case '9': $mes = 'Septiembre'; break; case '10': $mes = 'Octubre'; break; 
-                case '11': $mes = 'Noviembre'; break; case '12': $mes = 'Diciembre'; break; 
-            }
+            $mes = $this->getMonthAsTextSpanish();
 
             $pdf = PDF::loadView('pdf.avisoinicio', [
                 'obra' => $obra,
@@ -76,7 +77,8 @@ class ObrasController extends Controller
                 'date' => date('Y-m-d'),
                 'mes' => $mes,
                 'day' => date('d'),
-                'anio' => date('Y')
+                'anio' => date('Y'),
+                'presidente' => json_decode($presidente)[0]
                 ]);
 
             // Update status
@@ -95,15 +97,7 @@ class ObrasController extends Controller
             $obra = Obra::FullObraById($obra_id);
             $mes = '';
 
-            // Date formatting
-            switch(date('n')){
-                case '1': $mes = 'Enero'; break; case '2': $mes = 'Febrero'; break; 
-                case '3': $mes = 'Marzo'; break; case '4': $mes = 'Abril'; break; 
-                case '5': $mes = 'Mayo'; break; case '6': $mes = 'Junio'; break; 
-                case '7': $mes = 'Julio'; break; case '8': $mes = 'Agosto'; break; 
-                case '9': $mes = 'Septiembre'; break; case '10': $mes = 'Octubre'; break; 
-                case '11': $mes = 'Noviembre'; break; case '12': $mes = 'Diciembre'; break; 
-            }
+            $mes = $this->getMonthAsTextSpanish();
 
             $pdf = PDF::loadView('pdf.avisotermino', [
                 'obra' => $obra,
@@ -123,37 +117,31 @@ class ObrasController extends Controller
         }
     }
 
-    public function makePdfConv($obra_id, $payload){
+    public function makePdfConvenio($obra_id, $payload){
         try {
-            return json_decode($payload);
-            //$costos = CostosObra::getCostosByObra($obra_id);
-            //$comite = ComiteObra::getcomiteByObra($obra_id);
+            $data = json_decode($payload);
+            $costos = CostosObra::getCostosByObra($obra_id);
+            $comite = ComiteObra::getcomiteByObra($obra_id);
+            $presidente = ComiteObra::getPresidente($obra_id);
             $obra = Obra::FullObraById($obra_id);
-            $mes = '';
-
-            // Date formatting
-            switch(date('n')){
-                case '1': $mes = 'Enero'; break; case '2': $mes = 'Febrero'; break; 
-                case '3': $mes = 'Marzo'; break; case '4': $mes = 'Abril'; break; 
-                case '5': $mes = 'Mayo'; break; case '6': $mes = 'Junio'; break; 
-                case '7': $mes = 'Julio'; break; case '8': $mes = 'Agosto'; break; 
-                case '9': $mes = 'Septiembre'; break; case '10': $mes = 'Octubre'; break; 
-                case '11': $mes = 'Noviembre'; break; case '12': $mes = 'Diciembre'; break; 
-            }
-
-            $pdf = PDF::loadView('pdf.avisotermino', [
+            
+            $mes = $this->getMonthAsTextSpanish();
+            $pdf = PDF::loadView('pdf.convenioobra', [
                 'obra' => $obra,
-                'paraje' => $paraje,
                 'date' => date('Y-m-d'),
                 'mes' => $mes,
                 'dia' => date('d'),
-                'anio' => date('Y')
+                'anio' => date('Y'),
+                'presidente' => json_decode($presidente)[0],
+                'data' => $data,
+                'comite' => json_decode($comite),
+                'costos' => json_decode($costos)
                 ]);
 
             // Update status
-            Obra::update_termino($obra_id);
+            //Obra::update_termino($obra_id);
 
-            return $pdf->download("test_termino.pdf");
+            return $pdf->download("convenio_test.pdf");
         } catch (\Throwable $th) {
             throw $th;
         }
@@ -206,7 +194,7 @@ class ObrasController extends Controller
 
     public function store(Request $request){
         try {
-            // Parametros
+
             $desc = $this->checkForNull($request->input('desc'));
             $just = $this->checkForNull($request->input('just'));
             $paraje = $this->checkForNull($request->input('paraje'));
@@ -220,37 +208,53 @@ class ObrasController extends Controller
             $convobra = $this->checkForNull($request->input('convobra'));
             $coordn = $this->checkForNull($request->input('coordn'));
             $coorde = $this->checkForNull($request->input('coorde'));
-            $benefdir = $this->checkForNull($request->input('benefdir'));
             $benefind = $this->checkForNull($request->input('benefind'));
             $jefeobra = $this->checkForNull($request->input('jefeobra'));
             $tipo_obra_id = $this->checkForNull($request->input('tipo_id'));
             $cat_obra_id = $this->checkForNull($request->input('cat_id'));
             $array_costos = $this->checkForNull($request->input('arreglo_costos'));
-            $costo_total_obra = $this->checkForNull($request->input('costo_total_obra'));
             $array_comite = $this->checkForNull($request->input('arreglo_comite'));
+            $array_benefdir = $this->checkForNull($request->input('arreglo_beneficiarios_dir'));
 
-            $data = json_decode($array_costos);
+            // Parametros
+            $data_costos = json_decode($array_costos);
             $data_comite = json_decode($array_comite);
+            $data_benefdir = json_decode($array_benefdir);
+            $costo_total_obra = $this->setCostoTotalObra($data_costos);
             
             // Informacion base Obra
             $new_obra_id = Obra::guardarNueva(
                 $jefeobra, $coord, $desc, $just, $paraje, $edo_id, $mun_id, 
                 $sist, $prog, $convgral, $convobra, $coordn, $coorde,
-                $benefdir, $benefind, $tipo_obra_id, $cat_obra_id, $localidad_id, $costo_total_obra);
+                $benefind, $tipo_obra_id, $cat_obra_id, $localidad_id, $costo_total_obra);
         
             // Guardar costos
             $check = true;
             //return $data;
-            foreach ($data as $elem) {
+
+            // Refactor THIS URGENT !!!!
+            foreach ($data_costos as $elem) {
                 $check = CostosObra::insert($new_obra_id, $elem);
                 //return "HOLA";
             }
 
-            foreach ($data_comite as $elem){
-                ComiteObra::insert($new_obra_id, $elem);
+            if(count($data_comite) > 1){
+                foreach ($data_comite as $elem){
+                    ComiteObra::insert($new_obra_id, $elem);
+                }
+            }else{
+                ComiteObra::insert($new_obra_id, $data_comite);
             }
 
-            //return $check;
+
+            if (count($data_benefdir) > 1){
+                foreach ($data_benefdir as $elem){
+                    BeneficiadosDirectos::insert($new_obra_id, $elem);
+                }
+            }
+            else
+                BeneficiadosDirectos::insert($new_obra_id, $data_benefdir);
+
             return true;
         } catch (\Throwable $th) {
             throw $th;
@@ -316,6 +320,32 @@ class ObrasController extends Controller
             return null;
         }else{
             return $element;
+        }
+    }
+
+    private function getMonthAsTextSpanish(){
+        // Date formatting
+        $mes = '';
+        switch(date('n')){
+            case '1': $mes = 'Enero'; break; case '2': $mes = 'Febrero'; break; 
+            case '3': $mes = 'Marzo'; break; case '4': $mes = 'Abril'; break; 
+            case '5': $mes = 'Mayo'; break; case '6': $mes = 'Junio'; break; 
+            case '7': $mes = 'Julio'; break; case '8': $mes = 'Agosto'; break; 
+            case '9': $mes = 'Septiembre'; break; case '10': $mes = 'Octubre'; break; 
+            case '11': $mes = 'Noviembre'; break; case '12': $mes = 'Diciembre'; break; 
+        }
+        return $mes;
+    }
+
+    private function setCostoTotalObra($costos){
+        try {
+            $sum = 0;
+            foreach($costos as $costo){
+                $sum += $costo->monto;
+            }
+            return $sum;
+        } catch (\Throwable $th) {
+            throw $th;
         }
     }
 

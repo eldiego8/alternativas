@@ -18,6 +18,11 @@
                                 <BreezeNavLink :href="route('dashboard')" :active="route().current('dashboard')">
                                     Administración de Obras
                                 </BreezeNavLink>
+                                <template v-if="this.$page.props.auth.user.tipo_usuario == 1">
+                                    <BreezeNavLink :href="route('admin')" :active="route().current('admin')">
+                                        Administración de Usuarios
+                                    </BreezeNavLink>
+                                </template>
                             </div>
                         </div>
 

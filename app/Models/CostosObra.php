@@ -17,6 +17,7 @@ class CostosObra extends Model
 
             foreach($data as $elem){
                 $test = CostosObra::insert($obra_id, $elem);
+
             }
             
         } catch (\Throwable $th) {

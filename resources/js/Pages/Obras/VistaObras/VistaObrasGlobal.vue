@@ -58,7 +58,10 @@
         <form class="form-auto">
             <div class="header-row">
                 <h2 style="font-weight:700; margin-bottom:1vh; font-size:21px;">DETALLES DE OBRA CON CLAVE: {{this.obra_edit.clave_obra}} </h2>
-                <a :href="route('makePdf',{'obra_id': this.obra_edit.obra_id})" style="display:flex; padding:8px; border-radius:13px; background:#e84043; color:white; font-weight:800;">PDF de Obra <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M16 11h5l-9 10-9-10h5v-11h8v11zm1 11h-10v2h10v-2z"/></svg></a>
+                <div style="display:flex; align-items:center; flex-direction:row; ">
+                    <a :href="route('makeCSVZip',{'obra_id': this.obra_edit.obra_id})" style="display:flex; padding:8px; border-radius:13px; background:#e84043; color:white; font-weight:800;">CSV de Obra <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M16 11h5l-9 10-9-10h5v-11h8v11zm1 11h-10v2h10v-2z"/></svg></a>
+                    <a :href="route('makePdf',{'obra_id': this.obra_edit.obra_id})" style="display:flex; padding:8px; border-radius:13px; background:#e84043; color:white; font-weight:800;">PDF de Obra <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M16 11h5l-9 10-9-10h5v-11h8v11zm1 11h-10v2h10v-2z"/></svg></a>
+                </div>
             </div>
 
             <actas-obra 
@@ -67,14 +70,14 @@
             </actas-obra>
 
             <div class="flex flex-wrap -mx-3 mb-6">
-                <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+                <div class="w-full px-3">
                     <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-first-name">
                         Jefe de Obra
                     </label>
                     <input class="appearance-none block w-full bg-gray-200 text-gray-700 border  rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white" v-model="this.oedit_jefe_obra" type="text" :placeholder="this.obra_edit.jefe_obra"/>
                 </div>
 
-                 <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+                 <div class="w-full px-3">
                     <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-first-name">
                         Paraje
                     </label>
@@ -121,7 +124,7 @@
                     </div>
                 </div>
 
-                <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+                <div class="w-full px-3">
                     <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-first-name">
                         Clave Localidad
                     </label>
@@ -191,13 +194,6 @@
 
                 <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
                     <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-first-name">
-                        Beneficiado Directo
-                    </label>
-                    <input class="appearance-none block w-full bg-gray-200 text-gray-700 border  rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white" v-model="oedit_ben_dir" type="text" :placeholder="this.obra_edit.beneficiado_directo"/>
-                </div>
-
-                <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
-                    <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-first-name">
                         Beneficiado Indirecto
                     </label>
                     <input class="appearance-none block w-full bg-gray-200 text-gray-700 border  rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white" v-model="oedit_ben_ind" type="text" :placeholder="this.obra_edit.beneficiado_indirecto"/>
@@ -230,6 +226,13 @@
                     </label>
                     <textarea rows="10" class="appearance-none block w-full bg-gray-200 text-gray-700 border  rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white" v-model="oedit_justificacion"></textarea>
                 </div>
+
+                <h5 style="padding:.75rem; width:100%; margin-top:.75rem; margin-bottom:.75rem; text-align:left; font-weight:600;">Beneficiarios Directos</h5>
+
+                <beneficiados-directos-edit
+                    :obra_id="this.obra_edit.obra_id"
+                    :clave_obra="this.obra_edit.clave_obra"
+                />
 
                 <h5 style="padding:.75rem; width:100%; margin-top:.75rem; margin-bottom:.75rem; text-align:left; font-weight:600;">COSTOS</h5>
 
@@ -319,6 +322,7 @@
 							</div>
 						</div>
 					</div>
+                <h5 style="padding:.75rem; width:100%; margin-top:.75rem; margin-bottom:.75rem; text-align:left; font-weight:600;">COMITÉ</h5>
 
 					<div class="custom-wrap-01 divide-y">
 						<div class="left_col-flex">
@@ -397,8 +401,9 @@
 <script>
 import SeguimientoObra from './SeguimientoObra.vue'; 
 import ActasObra from '../../Actas/ActasObra.vue'
+import BeneficiadosDirectosEdit from './BeneficiadosDirectosEdit.vue';
 export default {
-    components:{ SeguimientoObra, ActasObra },
+    components:{ SeguimientoObra, ActasObra, BeneficiadosDirectosEdit },
     props:['registros', 'search_input'],
     data(){
         return{
@@ -513,11 +518,14 @@ export default {
             });  
         },
         pushCost(){
-            if(this.fuenfef_id != null && this.concepto_id != null){
+            console.log("HOLA");
+            console.log(this.fuentef_id, this.concepto_id);
+            if(this.fuentef_id != null && this.concepto_id != null){
+                console.log("IN");
                 this.costos_obra_edit.push({
                     'monto':isNaN(this.monto_costo) || this.monto_costo == null || this.monto_costo.length == 0 ? 0.0 : this.monto_costo,
                     'fuentef_text':this.fuentef_text,
-                    'fuentef_id':this.fuentef_id,
+                    'fuente_f_id':this.fuentef_id,
                     'concepto_costo_id':this.concepto_id,
                     'concepto_text':this.concepto_text,
                 });
@@ -576,8 +584,7 @@ export default {
             })
             .catch(err => console.error(err));
         },
-
-		  getComiteObra(obra_id){
+        getComiteObra(obra_id){
             axios.get(`/obras/edit/comite/${obra_id}`)
             .then(res => this.comite_obra_edit = res.data.length == 0? [] : res.data)
             .catch(err => console.err(err));

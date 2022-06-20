@@ -25,6 +25,23 @@ class ComiteObra extends Model
         }
     }
 
+    public static function getPresidente($obra_id){
+        try {
+            try {
+                $comite = ComiteObra::where('obra_id', $obra_id)->where('cargo', 'like', '%residente%')->get();
+                if ( count($comite) > 0) {
+                    return json_encode($comite);
+                }
+                else
+                    return null;
+            } catch (\Throwable $th) {
+                throw $th;
+            }
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+    }
+
     public static function insert($obra_id, $data){
         try {
             $comite = new ComiteObra;
@@ -42,7 +59,10 @@ class ComiteObra extends Model
     public static function getComiteByObra($obra_id){
         try {
             $comite = ComiteObra::where('obra_id', $obra_id)->get();
-            if ( count($comite) > 0) return json_encode($comite);
+            if ( count($comite) > 0) 
+                return json_encode($comite);
+             else 
+                return null;
         } catch (\Throwable $th) {
             throw $th;
         }

@@ -96,10 +96,10 @@
 					<label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-first-name">
 						Paraje:
 					</label>
-					<input @change.prevent="avisoInicio" class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500" type="text" placeholder="Paraje" v-model="paraje_aviso" name="paraje" required/>
+					<input @change.prevent="convenioObra" class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500" type="text" placeholder="Paraje" v-model="paraje_aviso" name="paraje" required/>
 			  </div>
 			  <div class="w-full px-3">
-					<a v-if="this.payload != null" :href="route('makePdf_convenio',{'obra_id': this.obra.obra_id, 'payload': this.paraje_aviso != null? this.paraje_aviso : null })" style="display:flex; padding:8px; border-radius:13px; background:#e84043; color:white; font-weight:800; justify-content:center; align-items:center;">PDF Convenio de Obra <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M16 11h5l-9 10-9-10h5v-11h8v11zm1 11h-10v2h10v-2z"/></svg></a>
+					<a v-if="this.payload != null" :href="route('makePdf_convenio',{'obra_id': this.obra.obra_id, 'payload': this.paraje_aviso != null? JSON.stringify(this.payload) : null })" style="display:flex; padding:8px; border-radius:13px; background:#e84043; color:white; font-weight:800; justify-content:center; align-items:center;">PDF Convenio de Obra <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M16 11h5l-9 10-9-10h5v-11h8v11zm1 11h-10v2h10v-2z"/></svg></a>
 			  </div>
         </form>
 
@@ -110,32 +110,34 @@
 <script>
 export default {
 	props:['type', 'obra', 'edo_aut'],
+	emits: ["download"],
 	data(){
 		return{
 			start_date:null,
 			form_on: false,
 			paraje_aviso:null,
 			nombre_obra_aviso:null,
-			payload:null,
+			payload:null
 		}
 	},
     methods:{
 		 avisoInicio(){
 			 this.payload = {
-				 'estado': "this.obra.edo",
-				 'mun': "this.obra.mun",
-				 'loc': "this.obra.loc",
-				 'paraje': "this.paraje_aviso"
+				'estado': "this.obra.edo",
+				'mun': "this.obra.mun",
+				'loc': "this.obra.loc",
+				'paraje': "this.paraje_aviso"
 			 }
-
-			//  axios.get(`/obras/pdf/${this.obra.obra_id}/${JSON.stringify(this.payload)}`)
-			//  .then(res => console.log(res.data))
-			//  .catch(err => console.error(err));
+		 },
+		 convenioObra(){
+			this.payload = {
+				'nombre_obra': this.nombre_obra_aviso,
+				'paraje': this.paraje_aviso
+			}
 		 },
 		 reloadAll(){
 			 this.$emit('download', true);
 		 }
-
     },
 	 created(){
 		 console.log(this.obra);

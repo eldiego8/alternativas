@@ -5,6 +5,9 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\ObrasController;
 use App\Http\Controllers\UbicacionesController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\ExportFilesController;
+use App\Http\Controllers\BeneficiadosDirectosController;
 
 /*
 |--------------------------------------------------------------------------
@@ -20,6 +23,17 @@ use App\Http\Controllers\UbicacionesController;
 
 // All routes require auth
 Route::middleware(['auth', 'verified'])->group(function () {
+
+    // Route Admin Dashboard
+    Route::group([ 'prefix' => 'admin'], function(){
+
+        Route::get('/', function (){
+            return Inertia::render('AdminDashboard');
+        })->name('admin');
+
+        Route::get('/users', [UserController::class, 'getUsers']);
+
+    });
 
     // Root route, starting page
     Route::get('/', function () {
@@ -78,9 +92,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
         
         // Archivos PDF
         Route::get('/pdf/{obra_id?}', [ObrasController::class, 'makePdf'])->name('makePdf');
+        Route::get('/csv/{obra_id?}', [ExportFilesController::class, 'exportZipFiles'])->name('makeCSVZip');
         Route::get('/pdf/inicio/{obra_id}/{paraje?}', [ObrasController::class, 'makePdfInicio'])->name('makePdf_inicio');
         Route::get('/pdf/fin/{obra_id?}/{paraje?}', [ObrasController::class, 'makePdfFin'])->name('makePdf_termino');
         Route::get('/pdf/convenio/{obra_id?}/{payload?}', [ObrasController::class, 'makePdfConvenio'])->name('makePdf_convenio');
+
+        // Beneficiados Directos
+        Route::get('/beneficiadosdirectos/{obra_id}', [BeneficiadosDirectosController::class, 'getBeneficiadosDirectosForObra']);
 
         // Logs de obras
         Route::post('/logs/new', [ObrasController::class, 'newLog']);

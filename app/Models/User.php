@@ -41,4 +41,12 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    public static function getUsers(){
+        try {
+            return User::all();
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+    }
 }
