@@ -12,4 +12,9 @@ class BeneficiadosDirectosController extends Controller
         $data = BeneficiadosDirectos::getBenefDirectosForObra($obra_id);
         return $data;
     }
+
+    public function addBeneficiadoDirectoForObra(Request $request){
+        $payload = json_decode($request->input('payload'));
+        return $payload;
+    }
 }

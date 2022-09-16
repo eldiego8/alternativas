@@ -45,6 +45,7 @@
                                     <th style="text-align:left">#</th>
                                     <th style="text-align:left">Nombre</th>
                                     <th style="text-align:left">Dirección</th>
+                                    <th style="text-align:left">Descripción</th>
                                 </tr>
                             </thead>
                             <tbody>

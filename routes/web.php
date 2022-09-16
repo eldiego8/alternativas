@@ -8,6 +8,7 @@ use App\Http\Controllers\UbicacionesController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ExportFilesController;
 use App\Http\Controllers\BeneficiadosDirectosController;
+use App\Http\Controllers\FormatosDocsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -99,12 +100,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         // Beneficiados Directos
         Route::get('/beneficiadosdirectos/{obra_id}', [BeneficiadosDirectosController::class, 'getBeneficiadosDirectosForObra']);
+        Route::get('/beneficiadosdirectos/add', [BeneficiadosDirectosController::class, 'addBeneficiadoDirectoForObra']);
 
         // Logs de obras
         Route::post('/logs/new', [ObrasController::class, 'newLog']);
         Route::get('/logs/get/{obra_id}', [ObrasController::class, 'getLogs']);
         Route::delete('/logs/drop/{log_id}', [ObrasController::class, 'dropLog']);
+
     });
+    // Formatos
+    Route::get('/formatos', [FormatosDocsController::class, 'getAllFormats']);
+    Route::post('/formatos/new', [FormatosDocsController::class, 'storeFormat']);
 
     Route::post('/cuencatributaria/nueva', [ObrasController::class, 'nuevaCuencaTributaria']);
 

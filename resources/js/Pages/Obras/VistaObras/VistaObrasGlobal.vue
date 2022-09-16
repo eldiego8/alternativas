@@ -31,7 +31,6 @@
                             <td class="border px-10 py-6" style="text-align:center;">
                                 <button @click.prevent="enableEdit(obra.obra_id)" class="edit-btn" style="text-align:center;">Detalle/Editar</button>
                             </td>
-
                         </tr>
                     </template>
                 </template>

@@ -17,13 +17,8 @@
             </div>
         </div>
         <div ref="singleoption" id="3" class="single-filter-option">
-            <div value="goodone" @click.prevent="setActive" id="3" class="item-filter">
-                <span id="3" value="span">Agregar Estudio</span>
-            </div>
-        </div>
-        <div ref="singleoption" id="4" class="single-filter-option">
             <div value="goodone" @click.prevent="setActive" id="4" class="item-filter">
-                <span id="4" value="span">Actas y Convenio</span>
+                <span id="4" value="span">Formatos Personalizados</span>
             </div>
         </div>
         <div ref="singleoption" id="4" class="single-filter-option">
